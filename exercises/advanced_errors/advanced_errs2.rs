@@ -16,8 +16,6 @@
 // 4. Complete the partial implementation of `Display` for
 //    `ParseClimateError`.
 
-// I AM NOT DONE
-
 use std::error::Error;
 use std::fmt::{self, Display, Formatter};
 use std::num::{ParseFloatError, ParseIntError};
@@ -46,9 +44,11 @@ impl From<ParseIntError> for ParseClimateError {
 // `ParseFloatError` values.
 impl From<ParseFloatError> for ParseClimateError {
     fn from(e: ParseFloatError) -> Self {
-        // TODO: Complete this function
+        ParseClimateError::ParseFloat(e)
     }
 }
+
+impl Error for ParseClimateError {}
 
 // TODO: Implement a missing trait so that `main()` below will compile. It
 // is not necessary to implement any methods inside the missing trait.
@@ -62,7 +62,10 @@ impl Display for ParseClimateError {
         // Imports the variants to make the following code more compact.
         use ParseClimateError::*;
         match self {
+            ParseInt(e) => write!(f, "error parsing year: invalid digit found in string"),
             NoCity => write!(f, "no city name"),
+            Empty => write!(f, "empty input"),
+            BadLen => write!(f, "incorrect number of fields"),
             ParseFloat(e) => write!(f, "error parsing temperature: {}", e),
             _ => write!(f, "unhandled error!"),
         }
@@ -89,8 +92,16 @@ impl FromStr for Climate {
     // TODO: Complete this function by making it handle the missing error
     // cases.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s == "" {
+            return Err(ParseClimateError::Empty);
+        }
+
         let v: Vec<_> = s.split(',').collect();
+        if v.len() != 3 {
+            return Err(ParseClimateError::BadLen);
+        }
         let (city, year, temp) = match &v[..] {
+            ["", year, temp] => return Err(ParseClimateError::NoCity),
             [city, year, temp] => (city.to_string(), year, temp),
             _ => return Err(ParseClimateError::BadLen),
         };

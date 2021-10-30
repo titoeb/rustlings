@@ -5,7 +5,18 @@
 
 // Write a macro that passes the quiz! No hints this time, you can do it!
 
-// I AM NOT DONE
+macro_rules! my_macro {
+    () => {
+        println!("Check out my macro!");
+    };
+    ($val:expr) => {
+        match $val {
+            "world!" => "Hello world!",
+            "goodbye!" => "Hello goodbye!",
+            _ => "None",
+        }
+    };
+}
 
 #[cfg(test)]
 mod tests {
